@@ -9,6 +9,7 @@ import java.util.Set;
 public class User {
 
    private int id;
+   private double balance;
    private String username;
    @JsonIgnore // prevent from being sent to client
    private String password;
@@ -16,7 +17,9 @@ public class User {
    private boolean activated;
    private Set<Authority> authorities = new HashSet<>();
 
-   public User() { }
+   public User() {
+
+   }
 
    public User(int id, String username, String password, String authorities) {
       this.id = id;
@@ -24,6 +27,14 @@ public class User {
       this.password = password;
       if (authorities != null) this.setAuthorities(authorities);
       this.activated = true;
+      this.balance = 1000.00;
+   }
+
+   public double getBalance() {
+      return this.balance;
+   }
+   public void setBalance(double newBalance) {
+      this.balance = newBalance;
    }
 
    public int getId() {

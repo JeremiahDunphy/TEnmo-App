@@ -13,6 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import com.techelevator.tenmo.model.AuthenticatedUser;
 import com.techelevator.tenmo.model.UserCredentials;
 
+import java.math.BigDecimal;
+
 public class AuthenticationService {
 
     private final String baseUrl;
@@ -52,4 +54,6 @@ public class AuthenticationService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(credentials, headers);
     }
+
+
 }

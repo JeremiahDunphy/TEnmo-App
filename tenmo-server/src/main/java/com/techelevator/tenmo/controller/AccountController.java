@@ -12,21 +12,21 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
     private AccountDao accountDao;
 
-    public AccountController(AccountDao accountDao) {
-        this.accountDao = accountDao;
+    public AccountController(AccountDao accountDao) { //dependency injection
+        this.accountDao = accountDao; //spring stores a map of where things are
     }
 
 
-    @ResponseStatus(HttpStatus.OK)
+   @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping(path = "/accountByUserId/{userId}")
     public Account getAccountByUserId(@PathVariable int userId) {
         try {
             return accountDao.getAccountbyUserId(userId);
         } catch (Exception e) {
-            // Log error
+            System.out.println("There was an error getting your account balance. " + e);
             return null;
         }
-        }
     }
+}
 
 

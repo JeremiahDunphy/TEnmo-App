@@ -2,10 +2,15 @@ package com.techelevator.tenmo;
 
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.AuthenticatedUser;
+import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.UserCredentials;
 import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.ConsoleService;
+import com.techelevator.tenmo.services.TransferService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class App {
 
@@ -16,6 +21,8 @@ public class App {
 
     private AuthenticatedUser currentUser;
     private AccountService accountService = new AccountService();
+
+    private TransferService transferService = new TransferService();
 
     public static void main(String[] args) {
         App app = new App();
@@ -29,6 +36,7 @@ public class App {
             mainMenu();
         }
     }
+
     private void loginMenu() {
         int menuSelection = -1;
         while (menuSelection != 0 && currentUser == null) {
@@ -87,33 +95,62 @@ public class App {
         }
     }
 
-	private void viewCurrentBalance() {
+    private void viewCurrentBalance() {
         int userId = currentUser.getUser().getId();
         accountService.setAuthToken(currentUser.getToken());
 
-        Account account  = accountService.getAccountByIdWithToken(userId);
+        Account account = accountService.getAccountByIdWithToken(userId);
         System.out.println("Your current Balance is: $ " + account.getBalance());
 
-	}
+    }
 
-	private void viewTransferHistory() {
-		// TODO Auto-generated method stub
-		
-	}
+    private void viewTransferHistory() {
+        int userId = currentUser.getUser().getId();
+        transferService.setAuthToken(currentUser.getToken());
 
-	private void viewPendingRequests() {
-		// TODO Auto-generated method stub
-		
-	}
+        try {
+            List<Transfer> transferHistory = transferService.getTransfersByUserId(userId);
 
-	private void sendBucks() {
-		// TODO Auto-generated method stub
-		
-	}
+            // Check if the transferHistory is not null before iterating
+            if (transferHistory != null && !transferHistory.isEmpty()) {
+                for (Transfer transfer : transferHistory) {
+                    System.out.println("Transfer ID: " + transfer.getTransfer_id() + " Amount: $" + transfer.getAmount());
+                }
+            } else {
+                System.out.println("No transfer history found.");
+            }
+        } catch (Exception e) {
+            System.out.println("An error occurred while trying to fetch the transfer history: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
-	private void requestBucks() {
-		// TODO Auto-generated method stub
-		
-	}
 
-}
+    private void viewPendingRequests() {
+        int requestTracker = 1;
+        int userId = currentUser.getUser().getId();
+        Account account = accountService.getAccountByIdWithToken(userId);
+        int accountId = account.getAccount_id();
+        transferService.setAuthToken(currentUser.getToken());
+        List<Transfer> pendingRequests = transferService.getTransfersByUserId(userId);
+        for (Transfer request : pendingRequests) {
+            System.out.println(requestTracker + ". " + request);
+            requestTracker++;
+        }
+        if (requestTracker == 1) {
+            System.out.println("No pending transfer requests.");
+
+        }
+    }
+
+        private void sendBucks () {
+            // TODO Auto-generated method stub
+
+        }
+
+        private void requestBucks () {
+            // TODO Auto-generated method stub
+
+        }
+
+    }

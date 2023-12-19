@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.controller;
 import com.techelevator.tenmo.dao.TransferDao;
+import com.techelevator.tenmo.exception.DaoException;
 import com.techelevator.tenmo.model.TransferDto;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -20,13 +21,24 @@ public class TransferController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public TransferDto createTransfer(@RequestBody TransferDto transferDto) {
+    public ResponseEntity<TransferDto> createTransfer(@RequestBody TransferDto transferDto) {
         try {
-            return transferDao.createTransfer(transferDto);
+            TransferDto createdTransfer = transferDao.createTransfer(transferDto);
+            return new ResponseEntity<>(createdTransfer, HttpStatus.CREATED);
         } catch (DataAccessException e) {
-            System.out.print("There was an error processing transfer: " + e);
-            return null;
+            throw new DaoException("Database access issue" + e.getMessage());
+
         }
+    }
+
+    @RequestMapping (path = "/update", method = RequestMethod.PUT)
+    public ResponseEntity<TransferDto> updateTransfer(TransferDto transferDto) {
+    try {
+        TransferDto updatedTransfer  = transferDao.createTransfer(transferDto);
+        return new ResponseEntity<>(updatedTransfer, HttpStatus.OK);
+    } catch(DataAccessException e) {
+        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     }
 
     @RequestMapping(path = "/transfers/{userId}", method = RequestMethod.GET)
@@ -42,4 +54,5 @@ public class TransferController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

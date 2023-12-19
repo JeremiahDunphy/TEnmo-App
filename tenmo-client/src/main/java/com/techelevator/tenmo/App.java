@@ -1,16 +1,14 @@
 package com.techelevator.tenmo;
 
-import com.techelevator.tenmo.model.Account;
-import com.techelevator.tenmo.model.AuthenticatedUser;
-import com.techelevator.tenmo.model.Transfer;
-import com.techelevator.tenmo.model.UserCredentials;
+import com.techelevator.tenmo.model.*;
 import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.ConsoleService;
 import com.techelevator.tenmo.services.TransferService;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Scanner;
 
 public class App {
 
@@ -129,28 +127,94 @@ public class App {
     private void viewPendingRequests() {
         int requestTracker = 1;
         int userId = currentUser.getUser().getId();
-        Account account = accountService.getAccountByIdWithToken(userId);
-        int accountId = account.getAccount_id();
         transferService.setAuthToken(currentUser.getToken());
+        accountService.setAuthToken(currentUser.getToken());
+
+        Account account = accountService.getAccountByIdWithToken(userId);
+        if (account == null) {
+            System.out.println("Error retrieving account information.");
+            return;
+        }
+
+        int accountId = account.getAccount_id();
         List<Transfer> pendingRequests = transferService.getTransfersByUserId(userId);
+        if (pendingRequests == null || pendingRequests.isEmpty()) {
+            System.out.println("No pending transfer requests.");
+            return;
+        }
         for (Transfer request : pendingRequests) {
             System.out.println(requestTracker + ". " + request);
             requestTracker++;
         }
-        if (requestTracker == 1) {
-            System.out.println("No pending transfer requests.");
+    }
 
+
+    private void sendBucks() {
+        transferService.setAuthToken(currentUser.getToken());
+        accountService.setAuthToken(currentUser.getToken());
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Please enter the user ID of the user you would like to send funds to:");
+        int recipientUserId = scanner.nextInt();
+        System.out.println("Please enter the amount you would like to transfer to user ID: " + recipientUserId);
+        BigDecimal transferAmount = scanner.nextBigDecimal();
+
+        TransferDto transferDto = new TransferDto();
+        transferDto.setAccount_from(currentUser.getUser().getId());
+        transferDto.setAccount_to(recipientUserId);
+        transferDto.setAmount(transferAmount);
+        transferDto.setTransfer_status_id(2); // Replace 1 with the appropriate status ID for a completed transfer
+        transferDto.setTransfer_type_id(2); // Replace 2 with the appropriate type ID for a send transfer
+
+        try {
+            TransferDto result = transferService.createTransfer(transferDto);
+            if (result != null) {
+                System.out.println("Transfer was successful");
+            } else {
+                System.out.println("Transfer failed.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Transfer failed: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("An error occurred: " + e.getMessage());
         }
     }
 
-        private void sendBucks () {
-            // TODO Auto-generated method stub
 
+    private void requestBucks() {
+        Transfer transfer = new Transfer();
+        int fromUserID = currentUser.getUser().getId();
+        Scanner scanner = new Scanner(System.in);
+           System.out.println("Please enter the userID of who would like to request TE bucks from: ");
+        int toUserID = scanner.nextInt();
+        if(toUserID == fromUserID) {
+        System.out.println("You cannot request TE bucks from yourself.");
+        return;
         }
 
-        private void requestBucks () {
-            // TODO Auto-generated method stub
+        System.out.println("Please enter the amount of TE bucks you would like to send: ");
+            BigDecimal amountTo = scanner.nextBigDecimal();
+            try {
+                transfer.setTransfer_type_id(1); // pending
+                transfer.setAccount_from(fromUserID);
+                transfer.setAccount_to(toUserID);
+                transfer.setAmount(amountTo);
+                transfer.setTransfer_status_id(1); //pending
 
-        }
+            } catch(IllegalArgumentException e) {
+                throw new IllegalArgumentException("You had a illegal argument: " + e);
+            }
+            try {
+                Transfer result = transferService.requestTransfer(transfer);
+                if (result != null) {
+                    System.out.println("Transfer request sent successfully.");
+                } else {
+                    System.out.println("Failed to send transfer request.");
+                }
+            } catch (Exception e) {
+        System.out.println("Error during transfer request: " + e.getMessage());
+    }
+
+    }
 
     }

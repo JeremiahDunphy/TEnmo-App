@@ -4,8 +4,6 @@ package com.techelevator.tenmo.model;
 import java.math.BigDecimal;
 import org.jetbrains.annotations.NotNull;
 
-import java.math.BigDecimal;
-
 public class Transfer {
     int transfer_id;
 
@@ -67,9 +65,6 @@ public class Transfer {
         public void setAmount(BigDecimal amount) {
             this.amount = amount;
         }
-
-
-
 
     }
 

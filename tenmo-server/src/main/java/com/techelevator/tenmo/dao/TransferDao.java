@@ -11,6 +11,8 @@ public interface TransferDao {
     void recordTransaction(TransferDto transferDto);
     List<TransferDto> getPastTransfersByUserId(int userid);
 
+    TransferDto requestTransfer(TransferDto transferDto);
+
 
 }
 
